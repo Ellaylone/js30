@@ -29,12 +29,69 @@
         </div>
 
         <script>
-         const msg = new SpeechSynthesisUtterance();
+         const msg = new SpeechSynthesisUtterance(),
+               voicesDropdown = document.querySelector('[name="voice"]'),
+               options = document.querySelectorAll('[type="range"], [name="text"]'),
+               speakButton = document.querySelector('#speak'),
+               stopButton = document.querySelector('#stop'),
+               synth = window.speechSynthesis;
+
          let voices = [];
-         const voicesDropdown = document.querySelector('[name="voice"]');
-         const options = document.querySelectorAll('[type="range"], [name="text"]');
-         const speakButton = document.querySelector('#speak');
-         const stopButton = document.querySelector('#stop');
+
+         function populateVoiceList () {
+             voices = synth.getVoices();
+
+             voices.forEach(voice => {
+                 const option = document.createElement('option');
+
+                 option.textContent = `${voice.name} (${voice.lang})`;
+
+                 if (option.default) {
+                     option.textContent += ' -- DEFAULT';
+                 }
+
+                 option.setAttribute('data-lang', voice.lang);
+                 option.setAttribute('data-name', voice.name);
+
+                 voicesDropdown.appendChild(option);
+             });
+         }
+
+         populateVoiceList();
+
+         if (speechSynthesis.onvoiceschanged !== undefined) {
+             speechSynthesis.onvoiceschanged = populateVoiceList;
+         }
+
+         function _onSpeak (e) {
+             e.preventDefault();
+
+             const utterThis = new SpeechSynthesisUtterance(options[2].value),
+                   selectedOption = voicesDropdown.selectedOptions[0].getAttribute('data-name');
+
+             for(i = 0; i < voices.length ; i++) {
+                 if(voices[i].name === selectedOption) {
+                     utterThis.voice = voices[i];
+                 }
+             }
+
+             utterThis.pitch = options[1].value;
+             utterThis.rate = options[0].value;
+
+             synth.speak(utterThis);
+         }
+
+         speakButton.addEventListener('click', _onSpeak);
+
+         function _onStop (e) {
+             e.preventDefault();
+
+             if (synth.speaking) {
+                 synth.cancel();
+             }
+         }
+
+         stopButton.addEventListener('click', _onStop);
         </script>
 
     </body>
