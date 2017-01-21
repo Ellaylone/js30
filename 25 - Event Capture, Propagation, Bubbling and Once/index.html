@@ -29,17 +29,27 @@
          }
 
          .two {
-             background:mistyrose;
+             background: mistyrose;
          }
 
          .three {
-             background:coral;
+             background: coral;
          }
         </style>
 
         <button></button>
         <script>
+         const layers = document.querySelectorAll('.one, .two, .three');
 
+         function _onClick (e) {
+             console.log(this, e.target);
+         }
+
+         layers.forEach(layer => {
+             layer.addEventListener('click', _onClick);
+         });
+
+         console.log(layers);
         </script>
     </body>
 </html>
